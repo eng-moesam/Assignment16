@@ -6,7 +6,7 @@ import type { loginDTO, singnUpDTO } from './auth.dto.js';
 import z from "zod"
 import { BadRequestException } from '../../Common/exceptions/domian.exceptions.js';
 import { error } from 'node:console';
-import { confrimEmailSchema, loginSchema, resendconfrimEmailSchema, signUpSchema } from './auth.validation.js';
+import { confrimEmailSchema, loginSchema, resendconfrimEmailSchema, resendForgetPassoerdOtpSchema, resetPasswordSchema, sendForgetPassoerdOtpSchema, signUpSchema, verfiyForgetPassoerdOtpSchema } from './auth.validation.js';
 import { validation } from '../../Middlewares/valdation.middleware.js';
 const authController =express.Router()
 
@@ -44,12 +44,40 @@ authController.post("/confrim-email",validation(confrimEmailSchema), async(req,r
 })
 authController.post("/resend-confrim-email-otp",validation(resendconfrimEmailSchema), async(req,res)=>{
      await authService.resendOtpConfrimEmail(req.body.email)
-
-
     
     return successResponse<string>({res,msg:"check your inbox"})
 })
+authController.post("/resend-otp-forget-password",validation(resendForgetPassoerdOtpSchema), async(req,res)=>{
+     await authService.resendForgetPasswordOtp(req.body.email)
+    
+    return successResponse<string>({res,msg:"check your inbox"})
+})
+authController.post("/send-otp-forget-password",
+    validation(sendForgetPassoerdOtpSchema), async(req,res)=>{
+     await authService.sendOTPforgetPassword(req.body.email)
+    
+    return successResponse({res,msg:"check your inbox"})
+})
+authController.post("/verfiy-otp-forget-password",
+    validation(verfiyForgetPassoerdOtpSchema), async(req,res)=>{
+     await authService.verfiyOTPforgetPassword(req.body)
+    
+    return successResponse({res})
+})
 
+authController.post("/reset-password",
+    validation(resetPasswordSchema), async(req,res)=>{
+     await authService.resetPassword(req.body)
+    
+    return successResponse({res})
+})
 
+authController.post("/signup/gmail", async (req, res, next) => {
+
+        const result = await authService.signupWithGmail(req.body.idToken)
+        return res.status(201).json({ mes: "done", result })
+
+   
+})
 
 export default authController

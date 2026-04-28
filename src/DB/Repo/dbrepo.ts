@@ -1,4 +1,5 @@
-import type { ProjectionType, QueryFilter, Types } from "mongoose";
+import type { UpdateOptions } from "mongodb";
+import type { ProjectionType, QueryFilter, Types, UpdateQuery } from "mongoose";
 import type { CreateOptions, QueryOptions } from "mongoose";
 import type { Model } from "mongoose";
 
@@ -30,6 +31,25 @@ abstract class DBRepo<T> {
   }) {
     return await this.Model.findById(id, projection, options)
   }
+ public async updateOne({filter,data,options={}}:
+  {filter:QueryFilter<T>,
+    data:UpdateQuery<T>,
+    options?:UpdateOptions}){
+return await this.Model.updateOne(
+      filter,data,options
+    )
+}
+
+ public async deleteOne({filter,options={}}:{
+  filter:QueryFilter<T>,
+  options?:UpdateOptions
+ }){
+return await this.Model.deleteOne(
+      filter,options
+    )
+}
+
+
 }
 
 export default DBRepo

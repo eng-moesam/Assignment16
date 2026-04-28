@@ -39,5 +39,34 @@ import { commonValidationFileds } from "../../Middlewares/valdation.middleware.j
     
   })
    }
+   export const resendForgetPassoerdOtpSchema={
+    body:z.strictObject({
+        email:commonValidationFileds.email,
+    
+  })
+   }
    
+   export const sendForgetPassoerdOtpSchema={
+    body:z.strictObject({
+        email:commonValidationFileds.email,
+    
+  })
+   }
+   export const verfiyForgetPassoerdOtpSchema={
+    body:z.strictObject({
+        email:commonValidationFileds.email,
+        otp:commonValidationFileds.otp })
+   }
+   
+   export const resetPasswordSchema={
+    body:verfiyForgetPassoerdOtpSchema.body.extend({
+        password:commonValidationFileds.password
+    })
+   }
   
+
+   export const signupGmailSchema={
+    body: z.object({
+        idToken:z.string()
+    })
+   }
