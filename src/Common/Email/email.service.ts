@@ -45,7 +45,7 @@ class MailService {
 
         const otp= createOtp()
 
-        await sendEmail({ to: email, subject: EmailEnum.confrimEmail, html: temblateEmail(otp)  })
+        await sendEmail({ to: email, subject, html: temblateEmail(otp)  })
 
 
         await this._redisMethods.set({

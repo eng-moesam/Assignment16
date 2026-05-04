@@ -63,18 +63,18 @@ userSchema.pre("save",async function(this:IHUser &{wasNew:Boolean}){
                 this.phone = phoneEncrypted
             }    
 })
-// userSchema.post("save",async function(this:IHUser &{wasNew:Boolean}){
+userSchema.post("save",async function(this:IHUser &{wasNew:Boolean}){
     
-//     try{
-//         if(this.wasNew){
-//         await mailService.sendEmailOtp({email: this.email, emailType: EmailEnum.confrimEmail, subject: EmailEnum.confrimEmail })}
-//     } catch (error) {
-//         console.log(error);
+    try{
+        if(this.wasNew){
+        await mailService.sendEmailOtp({email: this.email, emailType: EmailEnum.confrimEmail, subject: EmailEnum.confrimEmail })}
+    } catch (error) {
+        console.log(error);
         
-//     }
+    }
     
     
-// })
+})
 // userSchema.pre("validate",function (){
 //     console.log("pre validate");
     

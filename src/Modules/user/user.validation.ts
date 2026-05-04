@@ -4,3 +4,7 @@ export const logoutSchema ={
         logoutOptions:z.enum(["all","one"])
     })
 }
+export const profilPicSchema ={
+    body: z.object({
+originalname:z.string(),ContentType:z.string()    })
+}

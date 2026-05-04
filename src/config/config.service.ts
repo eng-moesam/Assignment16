@@ -24,4 +24,14 @@ export const WEB_CLIENT_ID = process.env.WEB_CLIENT_ID||""
 export const EMAIL_APP_PASSWORD=process.env.EMAIL_APP_PASSWORD||""
 export const EMAIL=process.env.EMAIL||""
 
+
 export const REDIS_URL = process.env.REDIS_URL||""
+
+
+export const REGION = process.env.REGION||""
+export const ACCESS_KEY_ID = process.env.ACCESS_KEY_ID||""
+export const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY||""
+export const BUCKET_NAME = process.env.BUCKET_NAME||""
+export const APPLICATION_NAME = process.env.APPLICATION_NAME||""
+
+

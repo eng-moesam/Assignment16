@@ -37,7 +37,7 @@ class AuthService {
 
         const [user] = await this._userRepo.create({ data: [bodyData] })
 
-        await this._mailService.sendEmailOtp({ email, emailType: EmailEnum.confrimEmail, subject: EmailEnum.confrimEmail })
+        // await this._mailService.sendEmailOtp({ email, emailType: EmailEnum.confrimEmail, subject: EmailEnum.confrimEmail })
 
         return user!;
 

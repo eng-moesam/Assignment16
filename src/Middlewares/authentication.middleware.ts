@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express"
 import { tokenTypeEnum } from "../Common/enums/token.enums.js"
-import { BadRequestException, ConflictException, UnauthorizedException } from "../Common/exceptions/domian.exceptions.js"
+import { BadRequestException, ConflictException, NotFoundException, UnauthorizedException } from "../Common/exceptions/domian.exceptions.js"
 import tokenService from "../Common/Security/token.service.js"
 import type { JwtPayload } from "jsonwebtoken"
 import type { RoleEnum } from "../Common/enums/enums.user.js"
@@ -46,18 +46,18 @@ export  function auth(tokenTypeParam=tokenTypeEnum.access){
     //   tokenTypeEnum.refresh== TokenType ? refreshSignature:accessSignature 
   }) as JwtPayload
 
-    if(
-      await redisService.get(`blackListToken::${verfiy.sub}::${verfiy.jti}`)
-    ){
+    if(verfiy.jti &&
+     ( await redisService.get(redisService.getBlackListToken({userId:verfiy.sub!,tokenId:verfiy.jti}))
+    )){
         throw new ConflictException("you need to sign again")
     }
     
     const user = await  UserRepo.findById({id:verfiy.sub as string})
     if (!user){
-      throw new Error("invalid acount",{cause:{statuscode:401}})
+      throw new NotFoundException("invalid acount")
     }
     if(new Date(verfiy.iat!*1000)<user.changeCreditTime){
-      throw new Error("you need to login again",{cause:{statuscode:404}})
+      throw new UnauthorizedException("you need to login again")
       
     }
     // console.log(verfiy.jti);

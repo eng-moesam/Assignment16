@@ -1,10 +1,10 @@
 import type { RedisArgument, SetOptions } from "redis";
 import type { EmailEnum } from "../../Common/enums/email.enums.js";
 import { client } from "./redis.connection.js";
-import type { Types } from "mongoose";
+import type {Types } from "mongoose";
 
 class RedisService{
-   getBlackListToken({userId,tokenId}:{userId:string|Types.ObjectId,tokenId:string}) {
+    getBlackListToken({userId,tokenId}:{userId:string|Types.ObjectId,tokenId:string}) {
     return `blackListToken::${userId}::${tokenId}`
 }
  getOtpKey({email,emailType}:{email:string,emailType:EmailEnum}) {

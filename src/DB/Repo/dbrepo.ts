@@ -25,29 +25,31 @@ abstract class DBRepo<T> {
     return await this.Model.findOne(filter, projection, options)
   }
   public async findById({ id, projection, options }: {
-    id:string|Types.ObjectId,
+    id: string | Types.ObjectId,
     projection?: ProjectionType<T> | null | undefined,
     options?: QueryOptions<T>
   }) {
     return await this.Model.findById(id, projection, options)
   }
- public async updateOne({filter,data,options={}}:
-  {filter:QueryFilter<T>,
-    data:UpdateQuery<T>,
-    options?:UpdateOptions}){
-return await this.Model.updateOne(
-      filter,data,options
+  public async updateOne({ filter, data, options = {} }:
+    {
+      filter: QueryFilter<T>,
+      data: UpdateQuery<T>,
+      options?: UpdateOptions
+    }) {
+    return await this.Model.updateOne(
+      filter, data, options
     )
-}
+  }
 
- public async deleteOne({filter,options={}}:{
-  filter:QueryFilter<T>,
-  options?:UpdateOptions
- }){
-return await this.Model.deleteOne(
-      filter,options
+  public async deleteOne({ filter, options = {} }: {
+    filter: QueryFilter<T>,
+    options?: UpdateOptions
+  }) {
+    return await this.Model.deleteOne(
+      filter, options
     )
-}
+  }
 
 
 }
