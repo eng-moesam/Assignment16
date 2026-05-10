@@ -24,6 +24,13 @@ abstract class DBRepo<T> {
   }) {
     return await this.Model.findOne(filter, projection, options)
   }
+  public async find({ filter, projection, options }: {
+    filter?: QueryFilter<T>,
+    projection?: ProjectionType<T> | null | undefined,
+    options?: QueryOptions<T>
+  }) {
+    return await this.Model.find(filter, projection, options)
+  }
   public async findById({ id, projection, options }: {
     id: string | Types.ObjectId,
     projection?: ProjectionType<T> | null | undefined,

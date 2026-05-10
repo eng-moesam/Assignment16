@@ -10,10 +10,13 @@ import UserModel, { type IHUser } from "./DB/Models/user.model.js"
 import S3BucketService from "./Common/S3Bucket/s3bucket.config.js"
 import { pipeline } from "node:stream"
 import { promisify } from "node:util"
-
+import successResponse from "./Common/Response/success.response.js"
+import postController from "./Modules/post/post.controller.js"
+import storyController from "./Modules/story/story.controller.js"
 
 async function bootstrap() {
 
+  
   const app: express.Express = express()
   app.use(express.json())
   app.use(cors())
@@ -61,6 +64,8 @@ async function bootstrap() {
 
   app.use("/auth", authController)
   app.use("/user", userController)
+  app.use("/post", postController)
+  app.use("/story", storyController)
   app.use("/uploads/*path", async (req, res, next) => {
     const {path}= req.params
     const {filename,download} =req.query
@@ -72,6 +77,23 @@ async function bootstrap() {
     }
     await pipleLineStreamRead(result.Body as NodeJS.ReadableStream, res)
   })
+  app.use("/pre-signed-upload/*path", async (req, res, next) => {
+    const {path}= req.params
+    const {filename,download} =req.query
+    const Key = path.join("/")
+    const result = await S3BucketService.createPresignedGetFile({ Key,filename:filename as string || (path[path.length-1]  )as string,download:download as string} )
+    return successResponse({res,msg:"data",data:result})
+    // const pipleLineStreamRead = promisify(pipeline)
+    // if(download == "true"){
+    //    res.setHeader("content-disposition",`attachment; filename=${filename  || path[path.length-1]}`)
+    // }
+    // await pipleLineStreamRead(result.Body as NodeJS.ReadableStream, res)
+  })
+  // app.use("/send-notfication", async (req, res, next) => {
+  //   console.log({body:req.body});
+  //     return res.status(200).json({req:req.body})
+      
+  // })
   app.use("/*dummy", (
     req: express.Request,
     res: express.Response,

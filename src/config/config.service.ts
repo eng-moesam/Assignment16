@@ -12,6 +12,7 @@ dotenv.config({path:path.resolve("./.env.dev")})
 
 export const PORT =process.env.port || 3000;
 export const DB_URI =process.env.DB_URI || "";
+export const DB_URI_ATLAS =process.env.DB_URI_ATLAS || "";
 export const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS as string) ||10;
 export const ENCRPTION_KEY = process.env.ENCRPTION_KEY||""
 export const TOKEN_SIGNATURE_USER= process.env.TOKEN_SIGNATURE_USER||""

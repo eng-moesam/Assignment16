@@ -71,6 +71,15 @@ public async  update({key,value}:{key:string,value:string|number}) {
 public async  setExpire(key:string,seconds:number) {
     return await client.expire(key,seconds)  
 }
+ getFCMKey(userId:Types.ObjectId | string) {
+    return `FCM::${userId}`
+}
+public async addFCMTokensToSet({userId,FCMToken}:{userId:Types.ObjectId | string,FCMToken:string}){
+     return await client.sAdd(this.getFCMKey(userId),FCMToken)
+}
+public async getFCMTokensSetMembers(userId:Types.ObjectId | string){
+     return await client.sMembers(this.getFCMKey(userId))
+}
 }
 
 export default new RedisService()

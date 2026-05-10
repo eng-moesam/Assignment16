@@ -6,5 +6,6 @@ export const logoutSchema ={
 }
 export const profilPicSchema ={
     body: z.object({
-originalname:z.string(),ContentType:z.string()    })
+originalname:z.string()
+,ContentType:z.string()    })
 }

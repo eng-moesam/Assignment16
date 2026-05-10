@@ -12,6 +12,7 @@ import redisService from "../../DB/Redis/redis.service.js"
 import { OAuth2Client } from "google-auth-library"
 import { WEB_CLIENT_ID } from "../../config/config.service.js"
 import { ProviderEnum } from "../../Common/enums/enums.user.js"
+import notificationService from "../../Common/Notification/notification.service.js"
 
 
 
@@ -20,6 +21,7 @@ class AuthService {
     private _tokenService = tokenService
     private _mailService = mailService
     private _redisMethods = redisService
+    private _NotificationService = notificationService
     constructor() { }
 
 
@@ -140,8 +142,12 @@ class AuthService {
         if (user.phone) {
             user.phone = decryptValue({ value: user.phone })
         }
-
-
+        if(bodyData.FCM){
+            await this._redisMethods.addFCMTokensToSet({userId:user._id,FCMToken:bodyData.FCM})
+            const tokens = await this._redisMethods.getFCMTokensSetMembers(user._id)
+            await this._NotificationService.sendNotifications({tokens,data:{title:"user logged In",body:`user logged In ${Date.now()}`}})
+        }
+         
         const { acsses_token, refresh_token } = this._tokenService.genratesignToken(user);
         return { acsses_token, refresh_token }
 

@@ -5,6 +5,7 @@ import { commonValidationFileds } from "../../Middlewares/valdation.middleware.j
     body:z.strictObject({
         email:commonValidationFileds.email,
         password:commonValidationFileds.password,
+        FCM:z.string().optional()
     
   })
    }

@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, GetObjectCommand, ObjectCannedACL, PutObjectCommand, S3, S3Client } from "@aws-sdk/client-s3"
+import { DeleteObjectCommand, DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, ObjectCannedACL, PutObjectCommand, S3, S3Client } from "@aws-sdk/client-s3"
 import { randomUUID } from "node:crypto";
 import { ACCESS_KEY_ID, APPLICATION_NAME, BUCKET_NAME, REGION, SECRET_ACCESS_KEY } from "../../config/config.service.js";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -42,6 +42,7 @@ class S3BucketService {
         const url = await getSignedUrl(this._clinet, command, { expiresIn: 3600 })
         return { key: command.input.Key!, url }
     }
+   
 
     async uploadLargeFile({ file, path, uploadApproach = StorageApproachEnum.Disk }: { file: Express.Multer.File, path: string, uploadApproach?: StorageApproachEnum }) {
         const command = new Upload({
@@ -73,11 +74,17 @@ class S3BucketService {
                     this.uploadLargeFile({ file, path, uploadApproach: StorageApproachEnum.Disk })
             })
         )
-
-
         return Keys
     }
 
+    async createPresignedGetFile({Key,filename,download}:{Key:string,filename?:string,download?:string}){
+      const command = new GetObjectCommand({
+        Bucket:BUCKET_NAME,
+        Key,
+        ResponseContentDisposition:download=="true"? `attachment; filename=${filename}`:undefined
+      })
+      return await getSignedUrl(this._clinet, command, { expiresIn: 3600 })
+   }
     async getFile(Key:string){
       const command = new GetObjectCommand({
         Bucket:BUCKET_NAME,
@@ -91,6 +98,21 @@ class S3BucketService {
         Key
     })
    return await this._clinet.send(command)
+   }
+   async DeleteFiles(Keys:{Key:string}[]){
+    const command = new DeleteObjectsCommand({
+        Bucket:BUCKET_NAME,
+        Delete:{Objects:Keys}
+    })
+   return await this._clinet.send(command)
+   }
+
+   async listFoldersKeys(Prefix:string){
+    const command = new ListObjectsV2Command({
+        Bucket:BUCKET_NAME,
+        Prefix:`${APPLICATION_NAME}/${Prefix}`
+    })
+    return await this._clinet.send(command)
    }
 }
 

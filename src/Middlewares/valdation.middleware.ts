@@ -5,7 +5,7 @@ import { GenderEnum } from '../Common/enums/enums.user.js';
 
 type keyRequest = keyof Request
 
-export function validation(validationSchema: Partial<Record<keyRequest, ZodType>>) {
+export function validation(validationSchema: Partial<Record<keyRequest, ZodType>>,filesInBody=false) {
     // keyof Request => body,query parmes
     z.object()
     return (req: Request, res: Response, next: NextFunction) => {
@@ -13,6 +13,9 @@ export function validation(validationSchema: Partial<Record<keyRequest, ZodType>
         for (const key of Object.keys(validationSchema) as keyRequest[]) {
             if (validationSchema[key] == undefined) {
                 continue;
+            }
+            if(key == "body"&&filesInBody==true){
+                req.body.files=req.files
             }
             const validation = validationSchema[key].safeParse(req[key])
             if (!validation.success) {

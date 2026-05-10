@@ -5,6 +5,8 @@ import userRepo from "../../DB/Repo/user.repo.js";
 import redisService from "../../DB/Redis/redis.service.js";
 import S3BucketService from "../../Common/S3Bucket/s3bucket.config.js"
 import type { IHUser } from "../../DB/Models/user.model.js";
+import type { profilePicDTO } from "./user.dto.js";
+import { StorageApproachEnum } from "../../Common/enums/multer.enums.js";
 class UserService {
    private _userRepo = userRepo
    private _redisMethods = redisService
@@ -43,17 +45,17 @@ class UserService {
       }
    }
 
-   async uploadProfilePic(file: Express.Multer.File, user: IHUser) {
+   async uploadProfilePic( user: IHUser,bodyData:profilePicDTO) {
       // const Key = await this._S3BuketServise.uploadFile({ file, path: `user/${user._id}/profilrPic` })
-      const Key = await this._S3BuketServise.uploadFile({ file, path: `user/${user._id}/profilrPic` })
+      const {originalname,ContentType}=bodyData
+      const Key = await this._S3BuketServise.createPresignedUploadFile({ originalname,ContentType, path: `user/${user._id}/profilrPic` })
       if(user.profilePic){
          await this._S3BuketServise.DeleteFile(user.profilePic)
       }
-      user.profilePic = Key
-      await user.save()
+      // user.profilePic = Key.key
+      // await user.save()
 
       return Key
-
 
    }
 
@@ -70,21 +72,24 @@ class UserService {
    }
     
    async deleteUser(user:IHUser){
-      await user.deleteOne()
+       
+
+    const files= await  this._S3BuketServise.listFoldersKeys(`user/${user._id}`)
+    const Keys =files.Contents?.map(files=>{
+
+         return {Key:files.Key}
+      })
     
-      if(user.profilePic){
-         await this._S3BuketServise.DeleteFile(user.profilePic)
-      }
-      if(user.covPic.length){
-         Promise.all(
-            user.covPic.map((covPic)=>{
-               return this._S3BuketServise.DeleteFile(covPic)
-            })
-         )
-      }
+     await this._S3BuketServise.DeleteFiles(Keys as {Key:string}[])
+
+    
+    await user.deleteOne()
+    
+   
 
    }
 }
+
 
 
 export default new UserService()
