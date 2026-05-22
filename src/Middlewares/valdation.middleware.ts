@@ -1,7 +1,8 @@
 import { z, type ZodType } from 'zod';
 import type { NextFunction, Request, Response } from "express"
-import { BadRequestException } from "../Common/exceptions/domian.exceptions.js"
+import { BadRequestException, MapGQLError } from "../Common/exceptions/domian.exceptions.js"
 import { GenderEnum } from '../Common/enums/enums.user.js';
+import { Types } from 'mongoose';
 
 type keyRequest = keyof Request
 
@@ -43,7 +44,22 @@ export function validation(validationSchema: Partial<Record<keyRequest, ZodType>
     }
 }
 
+export function validationGQL<T = any>(validationSchema: ZodType,value:T) {
+    const validation = validationSchema.safeParse(value)
+            if (!validation.success) {
+                MapGQLError(new BadRequestException("validation Error",validation.error.issues.map((ele) => {
+                    return { path: ele.path, message: ele.message }
+                })))
+            }
+        
+       
+    
+}
+
 export const commonValidationFileds = {
+    id:z.string().refine((value)=>{
+          return Types.ObjectId.isValid(value)
+        },"invalidObject id "),
     email: z.email(),
     password: z.string().regex(new RegExp(/(?=.*[a-z/)(?=.*[A-Z])(?=.*\d)(?=.*\W).{6,16}/),{error:"password must be 6-16 and use A a #$%^"}),
     confrimPassword: z.string(),

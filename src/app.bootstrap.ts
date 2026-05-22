@@ -13,6 +13,10 @@ import { promisify } from "node:util"
 import successResponse from "./Common/Response/success.response.js"
 import postController from "./Modules/post/post.controller.js"
 import storyController from "./Modules/story/story.controller.js"
+import commentController from "./Modules/comment/comment.controller.js"
+import { createHandler } from "graphql-http/lib/use/express"
+import schema from "./Modules/gql/schema.gql.js"
+import { auth } from "./Middlewares/authentication.middleware.js"
 
 async function bootstrap() {
 
@@ -60,11 +64,14 @@ async function bootstrap() {
   //  },{
   //   userName:"updated"
   //  })
+  app.all("/graphql",auth(),createHandler({ schema ,context:(req)=>({user:req.raw.user,payload:req.raw.payload})}))
 
 
   app.use("/auth", authController)
   app.use("/user", userController)
   app.use("/post", postController)
+   app.use("/comment", commentController)
+
   app.use("/story", storyController)
   app.use("/uploads/*path", async (req, res, next) => {
     const {path}= req.params

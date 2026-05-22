@@ -1,4 +1,4 @@
-import { Schema, model, type HydratedDocument } from 'mongoose';
+import { Schema, Types, model, type HydratedDocument } from 'mongoose';
 import  { GenderEnum, ProviderEnum, RoleEnum } from '../../Common/enums/enums.user.js';
 import { hashOperation } from '../../Common/Security/hash.js';
 import { encryptValue } from '../../Common/Security/encryption.js';
@@ -15,6 +15,7 @@ export interface IUser {
     gender: GenderEnum;
     role: RoleEnum;
     age: number;
+    frindes?:Types.ObjectId[];
     provider: ProviderEnum;
     profilePic: string;
     covPic: string[];
@@ -43,6 +44,7 @@ const userSchema = new Schema<IUser>({
     provider: { type: Number, enum: ProviderEnum, default: ProviderEnum.System },
     profilePic: String,
     covPic: [String],
+    frindes: [{type:Types.ObjectId,ref:"User"}],
     changeCreditTime: Date,
     deletedAt:Date
 
@@ -92,7 +94,7 @@ userSchema.post("save",async function(this:IHUser &{wasNew:Boolean}){
 //     console.log("post validate");
 
 // })
-userSchema.pre(["findOne","find"],function (){
+userSchema.pre(["findOne","find","countDocuments"],function (){
     // console.log(this.getQuery());
     const query =this.getQuery()
     if(!query.getSoftDelete){

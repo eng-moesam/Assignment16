@@ -7,7 +7,7 @@ import { model } from "mongoose";
 
 export interface IPost{
     content?:string;
-    attachments?:string;
+    attachments?:string[];
 
     likes?:Types.ObjectId[];
     tags?:Types.ObjectId[];
@@ -38,11 +38,13 @@ const postSchema = new Schema<IPost>({
  createBy:{type:Types.ObjectId,ref:"User",required:true},
  deletedAt:Date
 },{
-    timestamps:true
+    timestamps:true,
+    toObject:{virtuals:true},
+    toJSON:{virtuals:true}
  })
 
 
- postSchema.pre(["findOne","find"],function (){
+ postSchema.pre(["findOne","find","countDocuments"],function (){
     const query =this.getQuery()
     if(!query.getSoftDelete){
 
@@ -52,6 +54,12 @@ const postSchema = new Schema<IPost>({
     
 })
 
+postSchema.virtual("comments",{
+    localField:"_id",
+    foreignField:"postId",
+    ref:"Comment",
+    justOne:true,
+})
 
 
 const PostModel = model<IPost>('Post', postSchema);

@@ -1,0 +1,198 @@
+import type { Types } from "mongoose"
+import notificationService from "../../Common/Notification/notification.service.js"
+import s3bucketConfig from "../../Common/S3Bucket/s3bucket.config.js"
+import redisService from "../../DB/Redis/redis.service.js"
+import commentRepo from "../../DB/Repo/comment.repo.js"
+import postRepo from "../../DB/Repo/post.repo.js"
+import userRepo from "../../DB/Repo/user.repo.js"
+import type { IHUser } from "../../DB/Models/user.model.js"
+import { BadRequestException, NotFoundException } from "../../Common/exceptions/domian.exceptions.js"
+import type { IPost } from "../../DB/Models/post.model.js"
+
+
+
+class commentService {
+
+   private _commentRepo = commentRepo
+   private _postRepo = postRepo
+   private _userRepo = userRepo
+   private _redisMethods = redisService
+   private _S3BuketService = s3bucketConfig
+   private _NotificationService = notificationService
+
+   async createComment(bodyData: any, user: IHUser, postId: Types.ObjectId | string, files: Express.Multer.File[]) {
+      const { tags } = bodyData
+
+
+      const post = await this._postRepo.findOne({
+         filter: {
+            _id: postId,
+            $or: this._postRepo.checkPostPrivacy(user)
+         }
+      })
+
+
+      if (!post) {
+         throw new NotFoundException("not found post")
+
+      }
+      const comment = this._commentRepo.getDBDoc(bodyData)
+
+
+      if (bodyData.tags?.length) {
+         const mentionedUsers = await this._userRepo.find({ filter: { _id: { $in: bodyData.tags } } })
+         if (bodyData.tags.length != mentionedUsers?.length) {
+            throw new BadRequestException("filed to fined")
+         }
+
+         for (const tag of bodyData.tags || []) {
+            const tokens = await this._redisMethods.getFCMTokensSetMembers(tag)
+
+            if (tokens.length) {
+               await this._NotificationService.sendNotifications({
+                  tokens, data: {
+                     title: "comment taged",
+                     body: JSON.stringify({ postId: comment._id as Types.ObjectId, message: `you have taged on comment` })
+                  }
+               })
+            }
+         }
+
+
+      }
+
+
+      if (files?.length) {
+         const filesPaths = await this._S3BuketService.uploadFiles(
+            {
+               files: files as Express.Multer.File[],
+               path: `/Post/${post._id}/comment/${comment._id}`
+            }
+         )
+         comment.attachments = filesPaths ;
+      }
+
+
+      comment.createBy = user._id as Types.ObjectId
+      comment.postId = post._id
+
+      return await comment.save()
+      // return await this._postRepo.saveDBDoc(post)
+   }
+
+   async replyComment(bodyData: any, user: IHUser, postId: Types.ObjectId | string, commentId: Types.ObjectId | string, files: Express.Multer.File[]) {
+      const { tags } = bodyData
+
+
+      // const post = await this._postRepo.findOne({
+      //    filter: {
+      //       id: postId,
+      //       $or: this._postRepo.checkPostPrivacy(user)
+      //    }
+      // })
+
+
+      // if (!post) {
+      //    throw new NotFoundException("not found post")
+
+      // }
+
+
+
+      // const parentComment = await this._commentRepo.findById({ id: commentId })
+      // if (!parentComment) {
+      //    throw new NotFoundException("not found comment")
+
+      // }
+
+      const parentComment = await this._commentRepo.findOne({
+         filter: {
+            _id: commentId,
+            postId
+         },
+         options: {
+            populate: [{ path: "postId", match: { $or: this._postRepo.checkPostPrivacy(user) } }]
+         }
+      })
+
+      if (!parentComment || !(parentComment.postId as IPost)) { throw new NotFoundException("not found comment") }
+
+
+      const comment = this._commentRepo.getDBDoc(bodyData)
+
+
+      if (bodyData.tags?.length) {
+         const mentionedUsers = await this._userRepo.find({ filter: { _id: { $in: bodyData.tags } } })
+         if (bodyData.tags.length != mentionedUsers?.length) {
+            throw new BadRequestException("filed to fined")
+         }
+
+         for (const tag of bodyData.tags || []) {
+            const tokens = await this._redisMethods.getFCMTokensSetMembers(tag)
+
+            if (tokens.length) {
+               await this._NotificationService.sendNotifications({
+                  tokens, data: {
+                     title: "comment taged",
+                     body: JSON.stringify({ postId: comment._id as Types.ObjectId, message: `you have taged on comment` })
+                  }
+               })
+            }
+         }
+
+
+      }
+
+
+      if (files?.length) {
+         const filesPaths = await this._S3BuketService.uploadFiles(
+            {
+               files: files as Express.Multer.File[],
+               path: `/Post/${postId}/comment/${comment._id}`
+            }
+         )
+         comment.attachments = filesPaths ;
+      }
+
+
+      comment.createBy = user._id as Types.ObjectId
+      comment.postId = postId as Types.ObjectId
+      comment.commentId = commentId as Types.ObjectId
+
+      return await comment.save()
+      // return await this._postRepo.saveDBDoc(post)
+   }
+
+
+   async getCommentDetails(commentId: Types.ObjectId | string, user: IHUser) {
+
+
+      const comment = await this._commentRepo.findById({
+
+         id: commentId,
+         options:{
+            populate:[
+               {path:"postId",
+            match:{$or:this._postRepo.checkPostPrivacy(user)}
+         },
+         {path:"commentId"},
+         {path:"replies"}
+      ]}
+      }
+
+      )
+
+
+      if (!comment || !comment.postId) {
+         throw new NotFoundException("not found comment")
+
+      }
+    
+return comment
+
+   }
+
+}
+
+
+export default new commentService()
