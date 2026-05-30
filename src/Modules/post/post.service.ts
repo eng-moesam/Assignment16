@@ -150,7 +150,7 @@ class PostServise {
                   ]
 
                },
-               bodyData.files ||[]
+               uploadFiles
             ]
            }
 

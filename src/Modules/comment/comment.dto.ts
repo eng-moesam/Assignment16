@@ -1,11 +1,9 @@
 import type  z from "zod";
-import type { createPostSchema, findPostSchema, updatePostSchema } from "./comment.validation.js";
+import type { createCommentSchema, updateCommentSchema } from "./comment.validation.js";
 
 
 
 
 
-export type postCreateDTO   = z.infer<typeof createPostSchema.body>
-
-export type findpostDTO   = z.infer<typeof findPostSchema.query>
-export type updatepostDTO   = z.infer<typeof updatePostSchema.body>
+export type commentCreateDTO   = z.infer<typeof createCommentSchema.body>
+export type updateCommentDTO   = z.infer<typeof updateCommentSchema.body>
