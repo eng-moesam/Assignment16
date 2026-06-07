@@ -55,6 +55,18 @@ export function validationGQL<T = any>(validationSchema: ZodType,value:T) {
        
     
 }
+export function validationRealTime<T = any>(validationSchema: ZodType,value:T) {
+    const validation = validationSchema.safeParse(value)
+            if (!validation.success) {
+                
+                throw  new BadRequestException("validation Error",validation.error.issues.map((ele) => {
+                    return { path: ele.path, message: ele.message }
+                }))
+            }
+        
+       
+    
+}
 
 export const commonValidationFileds = {
     id:z.string().refine((value)=>{

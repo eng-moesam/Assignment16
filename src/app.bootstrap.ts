@@ -17,6 +17,8 @@ import commentController from "./Modules/comment/comment.controller.js"
 import { createHandler } from "graphql-http/lib/use/express"
 import schema from "./Modules/gql/schema.gql.js"
 import { auth } from "./Middlewares/authentication.middleware.js"
+import chatController from "./Modules/chat/chat.controller.js"
+import realtimeGateway from "./Modules/realtime/realtime.gateway.js"
 
 async function bootstrap() {
 
@@ -69,6 +71,7 @@ async function bootstrap() {
 
   app.use("/auth", authController)
   app.use("/user", userController)
+  app.use("/chat", chatController)
   app.use("/post", postController)
    app.use("/comment", commentController)
 
@@ -109,9 +112,10 @@ async function bootstrap() {
     res.status(404).json({ msg: "invalid:url" })
   })
   app.use(globalErrHandling)
-  app.listen(PORT, () => {
-    console.log("app listen on port 3000");
+ const server = app.listen(PORT, () => {
+    console.log(`app listen on port ${PORT}`);
   })
+  realtimeGateway.initializeIO(server)
 }
 
 export default bootstrap

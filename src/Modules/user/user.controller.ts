@@ -7,14 +7,20 @@ import { logoutSchema, profilPicSchema } from './user.validation.js';
 import successResponse from '../../Common/Response/success.response.js';
 import cloudUpload from '../../Common/Multer/multer.config.js';
 import { StorageApproachEnum } from '../../Common/enums/multer.enums.js';
+import chatController from '../chat/chat.controller.js';
 
 const userController =express.Router()
 
-userController.get("/",auth(),(req,res)=>{
+userController.use("/:userId/chat",chatController)
 
-    return res.status(200).json({user:req.user})
+userController.get("/",auth(),async (req,res)=>{
+
+    const result = await userService.getUserData(req.user)
+
+    successResponse({res,data:result,statuscode:200})
     
 })
+
 
 userController.post("/upload-profile-pic",auth(),
 validation(profilPicSchema),

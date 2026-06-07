@@ -80,6 +80,18 @@ public async addFCMTokensToSet({userId,FCMToken}:{userId:Types.ObjectId | string
 public async getFCMTokensSetMembers(userId:Types.ObjectId | string){
      return await client.sMembers(this.getFCMKey(userId))
 }
+ getSocketIoKey(userId:Types.ObjectId | string) {
+    return `SocketIoUserIds::${userId}`
+}
+public async addSocketIoToSet({userId,SocketId}:{userId:Types.ObjectId | string,SocketId:string}){
+     return await client.sAdd(this.getSocketIoKey(userId),SocketId)
+}
+public async removeSocketId({userId,SocketId}:{userId:Types.ObjectId | string,SocketId:string}){
+     return await client.sRem(this.getSocketIoKey(userId),SocketId)
+}
+public async getMembersSocketIoIds(userId:Types.ObjectId | string){
+     return await client.sMembers(this.getSocketIoKey(userId))
+}
 }
 
 export default new RedisService()

@@ -7,10 +7,25 @@ import S3BucketService from "../../Common/S3Bucket/s3bucket.config.js"
 import type { IHUser } from "../../DB/Models/user.model.js";
 import type { profilePicDTO } from "./user.dto.js";
 import { StorageApproachEnum } from "../../Common/enums/multer.enums.js";
+import chatRepo from "../../DB/Repo/chat.repo.js";
+import { ChatTypeEnum } from "../../Common/enums/chat.enums.js";
 class UserService {
    private _userRepo = userRepo
    private _redisMethods = redisService
    private _S3BuketServise = S3BucketService
+   private _chatRepo = chatRepo
+   
+   async getUserData(user:IHUser){
+      await user.populate([{path:"frindes"}]);
+
+      const groups = await this._chatRepo.find({
+         filter:{
+            participants:{$in:[user._id]},
+            type:ChatTypeEnum.OVM
+         }
+      })
+       return{user , groups}
+   }
   
    async logOut(userId: Types.ObjectId | string, tokenData: JwtPayload, logoutOptions: string) {
       //    console.log(tokenData);

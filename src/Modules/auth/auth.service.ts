@@ -227,7 +227,7 @@ class AuthService {
            data: [{
                 email: payloadGoogleToken.email,
                 userName: payloadGoogleToken.name,
-                profilePicture: payloadGoogleToken.picture,
+                profilePic: payloadGoogleToken.picture,
                 confrimEmail: true,
                 provider: ProviderEnum.Google
             }]
